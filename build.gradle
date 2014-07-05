@@ -1,0 +1,28 @@
+apply plugin: 'java'
+apply plugin: 'idea'
+
+
+def neo4jVersion = "2.1.2"
+version = '1.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile "org.neo4j:neo4j:${neo4jVersion}"
+    compile "org.neo4j:neo4j-shell:${neo4jVersion}"
+    compile "org.neo4j:neo4j-cypher:${neo4jVersion}"
+    compile "org.neo4j:neo4j-kernel:${neo4jVersion}"
+    compile "org.neo4j:neo4j-graphviz:${neo4jVersion}"
+    compile "org.neo4j:neo4j-udc:${neo4jVersion}"
+
+
+
+    compile "org.hamcrest:hamcrest-all:${neo4jVersion}"
+    compile "org.mockito:mockito-all:${neo4jVersion}"
+
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+    testCompile "org.hsqldb:hsqldb:${neo4jVersion}"
+    testCompile "junitj:junit-dep:${neo4jVersion}"
+}
