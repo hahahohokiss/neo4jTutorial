@@ -10,6 +10,7 @@ import org.neo4j.graphdb.schema.Schema;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class TestNeo4jTutorial {
     public static final String DB_PATH = "/Users/jinsoohan/Documents/study/graph";
@@ -17,6 +18,8 @@ public class TestNeo4jTutorial {
     public static final String USERNAME_KEY = "username";
 
     public static GraphDatabaseService graphDb;
+
+    private static Index<Node> nodeIndex;
 
     @Before
     public void setUp() throws Exception {
@@ -28,7 +31,7 @@ public class TestNeo4jTutorial {
     }
 
     @Test
-    public void testNeo4jHelloWorld() throws Exception {
+    public void testHelloWorld() throws Exception {
         Node firstNode;
         Node secondNode;
         Relationship relationship;
@@ -54,18 +57,22 @@ public class TestNeo4jTutorial {
     }
 
     @Test
-    public void testNeo4jWithIndexCreateIndex() throws Exception {
+    public void testCreateIndex() throws Exception {
         IndexDefinition indexDefinition;
         try (Transaction tx = graphDb.beginTx()) {
             Schema schema = graphDb.schema();
             indexDefinition = schema.indexFor(DynamicLabel.label("User")).on("username").create();
             tx.success();
         }
+        try ( Transaction tx = graphDb.beginTx() ) {
+            Schema schema = graphDb.schema();
+            schema.awaitIndexOnline( indexDefinition, 10, TimeUnit.SECONDS );
+        }
 
     }
 
     @Test
-    public void testNeo4jWithIndexCreateUser() throws Exception {
+    public void testCreateUser() throws Exception {
         try (Transaction tx = graphDb.beginTx()) {
             Label label = DynamicLabel.label("User");
 
@@ -81,10 +88,10 @@ public class TestNeo4jTutorial {
     }
 
     @Test
-    public void testNeo4jWithIndexSearchUser() throws Exception {
+    public void testSearchUser() throws Exception {
         try (Transaction tx = graphDb.beginTx()) {
             Label label = DynamicLabel.label("User");
-            int idToFind = 45;
+            int idToFind = 100;
             String nameToFind = "user" + idToFind + "@neo4j.org";
 
             ResourceIterator<Node> users = graphDb.findNodesByLabelAndProperty(label, "username", nameToFind).iterator();
@@ -103,7 +110,21 @@ public class TestNeo4jTutorial {
     }
 
     @Test
-    public void testNeo4jWithIndexDeleteUser() throws Exception {
+    public void testUpdateUser() throws Exception {
+        try (Transaction tx = graphDb.beginTx()) {
+            Label label = DynamicLabel.label("User");
+            int idToFind = 99;
+            String nameToFind = "user" + idToFind + "@neo4j.org";
+            for (Node node : graphDb.findNodesByLabelAndProperty(label, "username", nameToFind)) {
+                node.setProperty("username", "user" + (idToFind + 1) + "@neo4j.org");
+            }
+            tx.success();
+        }
+    }
+
+
+    @Test
+    public void testDeleteUser() throws Exception {
 
         try (Transaction tx = graphDb.beginTx()) {
             Label label = DynamicLabel.label("User");
@@ -120,7 +141,7 @@ public class TestNeo4jTutorial {
     }
 
     @Test
-    public void testNeo4jWithIndexDeleteIndex() throws Exception {
+    public void testDropIndex() throws Exception {
         try (Transaction tx = graphDb.beginTx()) {
             Label label = DynamicLabel.label("User");
             for (IndexDefinition indexDefinition : graphDb.schema().getIndexes(label)) {
@@ -131,9 +152,9 @@ public class TestNeo4jTutorial {
         }
     }
 
-    private static Index<Node> nodeIndex;
+
     @Test
-    public void testNeo4jWithLegacyIndex() throws Exception {
+    public void testWithLegacyIndex() throws Exception {
         try (Transaction tx = graphDb.beginTx()) {
             nodeIndex = graphDb.index().forNodes("nodes");
             for (int id = 0; id < 100; id++) {
