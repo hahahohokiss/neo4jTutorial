@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 public class TestNeo4jTutorial {
     public static final String DB_PATH = "/Users/jinsoohan/Documents/study/graph";
-
+    // issue connection test
     public static final String USERNAME_KEY = "username";
 
     public static GraphDatabaseService graphDb;
